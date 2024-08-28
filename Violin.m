@@ -121,7 +121,7 @@ classdef Violin < handle
 
     methods
 
-        function obj = Violin(data, pos, varargin)
+        function this = Violin(data, pos, varargin)
             %Violin plots a violin plot of some data at pos
             %   VIOLIN(DATA, POS) plots a violin at x-position POS for
             %   a vector of DATA points.
@@ -177,9 +177,9 @@ classdef Violin < handle
 
             st = dbstack; % get the calling function for reporting errors
             namefun = st.name;
-            args = obj.checkInputs(data, pos, varargin{:});
-            obj.Orientation = args.Orientation;
-            obj.Parent = args.Parent;
+            args = this.checkInputs(data, pos, varargin{:});
+            this.Orientation = args.Orientation;
+            this.Parent = args.Parent;
 
             if length(data) == 1
                 data2 = [];
@@ -210,22 +210,22 @@ classdef Violin < handle
             data2 = data2(not(isnan(data2)));
 
             if numel(data) == 1
-                [x, y] = obj.swapOrientationMaybe(pos, data);
-                obj.MedianPlot = scatter(x, y, 'filled', 'Parent', obj.Parent);
-                obj.MedianColor = args.MedianColor;
-                obj.MedianPlot.MarkerEdgeColor = args.EdgeColor;
+                [x, y] = this.swapOrientationMaybe(pos, data);
+                this.MedianPlot = scatter(x, y, 'filled', 'Parent', this.Parent);
+                this.MedianColor = args.MedianColor;
+                this.MedianPlot.MarkerEdgeColor = args.EdgeColor;
                 return
             end
 
-            hold(obj.Parent, 'on');
+            hold(this.Parent, 'on');
 
             %% Calculate kernel density estimation for the violin
-            [density, value, width] = obj.calcKernelDensity(data, args.Bandwidth, args.Width);
+            [density, value, width] = this.calcKernelDensity(data, args.Bandwidth, args.Width);
 
             % also calculate the kernel density of the comparison data if
             % provided
             if ~isempty(data2)
-                [densityC, valueC, widthC] = obj.calcKernelDensity(data2, args.Bandwidth, args.Width);
+                [densityC, valueC, widthC] = this.calcKernelDensity(data2, args.Bandwidth, args.Width);
             end
 
             %% Plot the data points within the violin area
@@ -257,9 +257,9 @@ classdef Violin < handle
 
                     if ~isempty(data2)
                         jitter = 1 * (rand(size(data))); %right
-                        [x, y] = obj.swapOrientationMaybe(pos + jitter .* jitterstrength, data);
-                        obj.ScatterPlot = ...
-                            scatter(x, y, args.MarkerSize, 'filled', 'Parent', obj.Parent);
+                        [x, y] = this.swapOrientationMaybe(pos + jitter .* jitterstrength, data);
+                        this.ScatterPlot = ...
+                            scatter(x, y, args.MarkerSize, 'filled', 'Parent', this.Parent);
                         % plot the data points within the violin area
                         if length(densityC) > 1
                             jitterstrength = interp1(valueC, densityC * widthC, data2);
@@ -268,13 +268,13 @@ classdef Violin < handle
                         end
 
                         jitter = -1 * rand(size(data2)); % left
-                        [x, y] = obj.swapOrientationMaybe(pos + jitter .* jitterstrength, data2);
-                        obj.ScatterPlot2 = ...
-                            scatter(x, y, args.MarkerSize, 'filled', 'Parent', obj.Parent);
+                        [x, y] = this.swapOrientationMaybe(pos + jitter .* jitterstrength, data2);
+                        this.ScatterPlot2 = ...
+                            scatter(x, y, args.MarkerSize, 'filled', 'Parent', this.Parent);
                     else
-                        [x, y] = obj.swapOrientationMaybe(pos + jitter .* jitterstrength, data);
-                        obj.ScatterPlot = ...
-                            scatter(x, y, args.MarkerSize, 'filled', 'Parent', obj.Parent);
+                        [x, y] = this.swapOrientationMaybe(pos + jitter .* jitterstrength, data);
+                        this.ScatterPlot = ...
+                            scatter(x, y, args.MarkerSize, 'filled', 'Parent', this.Parent);
 
                     end
 
@@ -283,13 +283,13 @@ classdef Violin < handle
 
                     switch args.HalfViolin
                         case 'right'
-                            [x, y] = obj.swapOrientationMaybe([pos - ((counts') / max(counts)) * max(jitterstrength) * 2, pos * ones(size(counts, 2), 1)]', ...
+                            [x, y] = this.swapOrientationMaybe([pos - ((counts') / max(counts)) * max(jitterstrength) * 2, pos * ones(size(counts, 2), 1)]', ...
                                 [edges(1:end - 1) + max(diff(edges)) / 2; edges(1:end - 1) + max(diff(edges)) / 2]);
-                            obj.HistogramPlot = plot(x, y, '-', 'LineWidth', 1, 'Color', 'k', 'Parent', obj.Parent);
+                            this.HistogramPlot = plot(x, y, '-', 'LineWidth', 1, 'Color', 'k', 'Parent', this.Parent);
                         case 'left'
-                            [x, y] = obj.swapOrientationMaybe([pos * ones(size(counts, 2), 1), pos + ((counts') / max(counts)) * max(jitterstrength) * 2]', ...
+                            [x, y] = this.swapOrientationMaybe([pos * ones(size(counts, 2), 1), pos + ((counts') / max(counts)) * max(jitterstrength) * 2]', ...
                                 [edges(1:end - 1) + max(diff(edges)) / 2; edges(1:end - 1) + max(diff(edges)) / 2]);
-                            obj.HistogramPlot = plot(x, y, '-', 'LineWidth', 1, 'Color', 'k', 'Parent', obj.Parent);
+                            this.HistogramPlot = plot(x, y, '-', 'LineWidth', 1, 'Color', 'k', 'Parent', this.Parent);
                         otherwise
                             fprintf([namefun, ' No histogram/bar plot option available for full violins, as it would look overcrowded.\n'])
                     end
@@ -304,27 +304,27 @@ classdef Violin < handle
 
                 switch args.HalfViolin
                     case 'right'
-                        [x, y] = obj.swapOrientationMaybe([pos + density * width halfViol * pos], ...
+                        [x, y] = this.swapOrientationMaybe([pos + density * width halfViol * pos], ...
                             [value value(end:-1:1)]);
-                        obj.ViolinPlot = fill(x, y, [1 1 1], 'Parent', obj.Parent); % plot color will be overwritten later
+                        this.ViolinPlot = fill(x, y, [1 1 1], 'Parent', this.Parent); % plot color will be overwritten later
                     case 'left'
-                        [x, y] = obj.swapOrientationMaybe([halfViol * pos pos - density(end:-1:1) * width], ...
+                        [x, y] = this.swapOrientationMaybe([halfViol * pos pos - density(end:-1:1) * width], ...
                             [value value(end:-1:1)]);
-                        obj.ViolinPlot = fill(x, y, [1 1 1], 'Parent', obj.Parent); % plot color will be overwritten later
+                        this.ViolinPlot = fill(x, y, [1 1 1], 'Parent', this.Parent); % plot color will be overwritten later
                     case 'full'
-                        [x, y] = obj.swapOrientationMaybe([pos + density * width pos - density(end:-1:1) * width], ...
+                        [x, y] = this.swapOrientationMaybe([pos + density * width pos - density(end:-1:1) * width], ...
                             [value value(end:-1:1)]);
-                        obj.ViolinPlot = fill(x, y, [1 1 1], 'Parent', obj.Parent); % plot color will be overwritten later
+                        this.ViolinPlot = fill(x, y, [1 1 1], 'Parent', this.Parent); % plot color will be overwritten later
                 end
 
             else
                 % plot right half of the violin
-                [x, y] = obj.swapOrientationMaybe([pos + density * width pos - density(1) * width], [value value(1)]);
-                obj.ViolinPlot = fill(x, y, [1 1 1], 'Parent', obj.Parent);
+                [x, y] = this.swapOrientationMaybe([pos + density * width pos - density(1) * width], [value value(1)]);
+                this.ViolinPlot = fill(x, y, [1 1 1], 'Parent', this.Parent);
                 % plot left half of the violin
-                [x, y] = obj.swapOrientationMaybe([pos - densityC(end) * widthC pos - densityC(end:-1:1) * widthC], ...
+                [x, y] = this.swapOrientationMaybe([pos - densityC(end) * widthC pos - densityC(end:-1:1) * widthC], ...
                     [valueC(end) valueC(end:-1:1)]);
-                obj.ViolinPlot2 = fill(x, y, [1 1 1], 'Parent', obj.Parent);
+                this.ViolinPlot2 = fill(x, y, [1 1 1], 'Parent', this.Parent);
             end
 
             %% Plot the quartiles within the violin
@@ -346,12 +346,12 @@ classdef Violin < handle
                     end
 
                     indices = h >= quartiles(1) & h <= quartiles(3);
-                    [x, y] = obj.swapOrientationMaybe(w(indices), h(indices));
-                    obj.ViolinPlotQ = fill(x, y, [1 1 1], 'Parent', obj.Parent); % plot color will be overwritten later
+                    [x, y] = this.swapOrientationMaybe(w(indices), h(indices));
+                    this.ViolinPlotQ = fill(x, y, [1 1 1], 'Parent', this.Parent); % plot color will be overwritten later
                 case 'boxplot'
-                    [x, y] = obj.swapOrientationMaybe(pos + [-1, 1, 1, -1] * args.BoxWidth, ...
+                    [x, y] = this.swapOrientationMaybe(pos + [-1, 1, 1, -1] * args.BoxWidth, ...
                         [quartiles(1) quartiles(1) quartiles(3) quartiles(3)]);
-                    obj.BoxPlot = fill(x, y, [1 1 1], 'Parent', obj.Parent); % plot color will be overwritten later
+                    this.BoxPlot = fill(x, y, [1 1 1], 'Parent', this.Parent); % plot color will be overwritten later
                 case 'none'
             end
 
@@ -371,17 +371,17 @@ classdef Violin < handle
 
             switch args.HalfViolin
                 case 'right'
-                    [x, y] = obj.swapOrientationMaybe(pos + [0, 1] .* meanDensityWidth, [meanValue, meanValue]);
-                    obj.MeanPlot = plot(x, y, 'Parent', obj.Parent);
+                    [x, y] = this.swapOrientationMaybe(pos + [0, 1] .* meanDensityWidth, [meanValue, meanValue]);
+                    this.MeanPlot = plot(x, y, 'Parent', this.Parent);
                 case 'left'
-                    [x, y] = obj.swapOrientationMaybe(pos + [-1, 0] .* meanDensityWidth, [meanValue, meanValue]);
-                    obj.MeanPlot = plot(x, y, 'Parent', obj.Parent);
+                    [x, y] = this.swapOrientationMaybe(pos + [-1, 0] .* meanDensityWidth, [meanValue, meanValue]);
+                    this.MeanPlot = plot(x, y, 'Parent', this.Parent);
                 case 'full'
-                    [x, y] = obj.swapOrientationMaybe(pos + [-1, 1] .* meanDensityWidth, [meanValue, meanValue]);
-                    obj.MeanPlot = plot(x, y, 'Parent', obj.Parent);
+                    [x, y] = this.swapOrientationMaybe(pos + [-1, 1] .* meanDensityWidth, [meanValue, meanValue]);
+                    this.MeanPlot = plot(x, y, 'Parent', this.Parent);
             end
 
-            obj.MeanPlot.LineWidth = 1;
+            this.MeanPlot.LineWidth = 1;
 
             %% Plot the median, notch, and whiskers
             IQR = quartiles(3) - quartiles(1);
@@ -391,33 +391,33 @@ classdef Violin < handle
             hiwhisker = min(hiwhisker, max(data(data < hiwhisker)));
 
             if ~isempty(lowhisker) && ~isempty(hiwhisker)
-                [x, y] = obj.swapOrientationMaybe([pos pos], [lowhisker hiwhisker]);
-                obj.WhiskerPlot = plot(x, y, 'Parent', obj.Parent);
+                [x, y] = this.swapOrientationMaybe([pos pos], [lowhisker hiwhisker]);
+                this.WhiskerPlot = plot(x, y, 'Parent', this.Parent);
             end
 
             % Median
-            [x, y] = obj.swapOrientationMaybe(pos, quartiles(2));
-            obj.MedianPlot = scatter(x, y, ...
-                args.MedianMarkerSize, [1 1 1], 'filled', 'Parent', obj.Parent);
+            [x, y] = this.swapOrientationMaybe(pos, quartiles(2));
+            this.MedianPlot = scatter(x, y, ...
+                args.MedianMarkerSize, [1 1 1], 'filled', 'Parent', this.Parent);
 
             % Notches
-            [x, y] = obj.swapOrientationMaybe(pos, quartiles(2) - 1.57 * IQR / sqrt(length(data)));
-            obj.NotchPlots = scatter(x, y, [], [1 1 1], 'filled', '^', 'Parent', obj.Parent);
-            [x, y] = obj.swapOrientationMaybe(pos, quartiles(2) + 1.57 * IQR / sqrt(length(data)));
-            obj.NotchPlots(2) = scatter(x, y, [], [1 1 1], 'filled', 'v', 'Parent', obj.Parent);
+            [x, y] = this.swapOrientationMaybe(pos, quartiles(2) - 1.57 * IQR / sqrt(length(data)));
+            this.NotchPlots = scatter(x, y, [], [1 1 1], 'filled', '^', 'Parent', this.Parent);
+            [x, y] = this.swapOrientationMaybe(pos, quartiles(2) + 1.57 * IQR / sqrt(length(data)));
+            this.NotchPlots(2) = scatter(x, y, [], [1 1 1], 'filled', 'v', 'Parent', this.Parent);
 
             %% Set graphical preferences
-            obj.EdgeColor = args.EdgeColor;
-            obj.MedianPlot.LineWidth = args.LineWidth;
-            obj.BoxColor = args.BoxColor;
-            obj.BoxWidth = args.BoxWidth;
-            obj.MedianColor = args.MedianColor;
-            obj.ShowData = args.ShowData;
-            obj.ShowNotches = args.ShowNotches;
-            obj.ShowMean = args.ShowMean;
-            obj.ShowBox = args.ShowBox;
-            obj.ShowMedian = args.ShowMedian;
-            obj.ShowWhiskers = args.ShowWhiskers;
+            this.EdgeColor = args.EdgeColor;
+            this.MedianPlot.LineWidth = args.LineWidth;
+            this.BoxColor = args.BoxColor;
+            this.BoxWidth = args.BoxWidth;
+            this.MedianColor = args.MedianColor;
+            this.ShowData = args.ShowData;
+            this.ShowNotches = args.ShowNotches;
+            this.ShowMean = args.ShowMean;
+            this.ShowBox = args.ShowBox;
+            this.ShowMedian = args.ShowMedian;
+            this.ShowWhiskers = args.ShowWhiskers;
 
             if not(isempty(args.ViolinColor))
 
@@ -442,7 +442,7 @@ classdef Violin < handle
             else
                 % defaults
                 if args.scpltBool
-                    ViolinColor{1} = obj.ScatterPlot.CData;
+                    ViolinColor{1} = this.ScatterPlot.CData;
                 else
                     ViolinColor{1} = [0 0 0];
                 end
@@ -450,7 +450,7 @@ classdef Violin < handle
                 ViolinColor{2} = [0 0 0];
             end
 
-            obj.ViolinColor = ViolinColor;
+            this.ViolinColor = ViolinColor;
 
             if not(isempty(args.ViolinAlpha))
 
@@ -477,278 +477,278 @@ classdef Violin < handle
                 ViolinAlpha = {1, 1};
             end
 
-            obj.ViolinAlpha = ViolinAlpha;
+            this.ViolinAlpha = ViolinAlpha;
 
-            set(obj.ViolinPlot, 'Marker', 'none', 'LineStyle', '-');
-            set(obj.ViolinPlot2, 'Marker', 'none', 'LineStyle', '-');
+            set(this.ViolinPlot, 'Marker', 'none', 'LineStyle', '-');
+            set(this.ViolinPlot2, 'Marker', 'none', 'LineStyle', '-');
         end
 
         %% SET METHODS
-        function set.EdgeColor(obj, color)
+        function set.EdgeColor(this, color)
 
-            if ~isempty(obj.ViolinPlot)
-                obj.ViolinPlot.EdgeColor = color;
-                obj.ViolinPlotQ.EdgeColor = color;
+            if ~isempty(this.ViolinPlot)
+                this.ViolinPlot.EdgeColor = color;
+                this.ViolinPlotQ.EdgeColor = color;
 
-                if ~isempty(obj.ViolinPlot2)
-                    obj.ViolinPlot2.EdgeColor = color;
+                if ~isempty(this.ViolinPlot2)
+                    this.ViolinPlot2.EdgeColor = color;
                 end
 
             end
 
         end
 
-        function color = get.EdgeColor(obj)
+        function color = get.EdgeColor(this)
 
-            if ~isempty(obj.ViolinPlot)
-                color = obj.ViolinPlot.EdgeColor;
+            if ~isempty(this.ViolinPlot)
+                color = this.ViolinPlot.EdgeColor;
             end
 
         end
 
-        function set.MedianColor(obj, color)
-            obj.MedianPlot.MarkerFaceColor = color;
+        function set.MedianColor(this, color)
+            this.MedianPlot.MarkerFaceColor = color;
 
-            if ~isempty(obj.NotchPlots)
-                obj.NotchPlots(1).MarkerFaceColor = color;
-                obj.NotchPlots(2).MarkerFaceColor = color;
+            if ~isempty(this.NotchPlots)
+                this.NotchPlots(1).MarkerFaceColor = color;
+                this.NotchPlots(2).MarkerFaceColor = color;
             end
 
         end
 
-        function color = get.MedianColor(obj)
-            color = obj.MedianPlot.MarkerFaceColor;
+        function color = get.MedianColor(this)
+            color = this.MedianPlot.MarkerFaceColor;
         end
 
-        function set.BoxColor(obj, color)
+        function set.BoxColor(this, color)
 
-            if ~isempty(obj.BoxPlot)
-                obj.BoxPlot.FaceColor = color;
-                obj.BoxPlot.EdgeColor = color;
-                obj.WhiskerPlot.Color = color;
-                obj.MedianPlot.MarkerEdgeColor = color;
-                obj.NotchPlots(1).MarkerFaceColor = color;
-                obj.NotchPlots(2).MarkerFaceColor = color;
-            elseif ~isempty(obj.ViolinPlotQ)
-                obj.WhiskerPlot.Color = color;
-                obj.MedianPlot.MarkerEdgeColor = color;
-                obj.NotchPlots(1).MarkerFaceColor = color;
-                obj.NotchPlots(2).MarkerFaceColor = color;
+            if ~isempty(this.BoxPlot)
+                this.BoxPlot.FaceColor = color;
+                this.BoxPlot.EdgeColor = color;
+                this.WhiskerPlot.Color = color;
+                this.MedianPlot.MarkerEdgeColor = color;
+                this.NotchPlots(1).MarkerFaceColor = color;
+                this.NotchPlots(2).MarkerFaceColor = color;
+            elseif ~isempty(this.ViolinPlotQ)
+                this.WhiskerPlot.Color = color;
+                this.MedianPlot.MarkerEdgeColor = color;
+                this.NotchPlots(1).MarkerFaceColor = color;
+                this.NotchPlots(2).MarkerFaceColor = color;
             end
 
         end
 
-        function color = get.BoxColor(obj)
+        function color = get.BoxColor(this)
 
-            if ~isempty(obj.BoxPlot)
-                color = obj.BoxPlot.FaceColor;
+            if ~isempty(this.BoxPlot)
+                color = this.BoxPlot.FaceColor;
             end
 
         end
 
-        function set.BoxWidth(obj, width)
+        function set.BoxWidth(this, width)
 
-            if ~isempty(obj.BoxPlot)
-                pos = mean(obj.BoxPlot.XData);
-                obj.BoxPlot.XData = pos + [-1, 1, 1, -1] * width;
+            if ~isempty(this.BoxPlot)
+                pos = mean(this.BoxPlot.XData);
+                this.BoxPlot.XData = pos + [-1, 1, 1, -1] * width;
             end
 
         end
 
-        function width = get.BoxWidth(obj)
-            width = max(obj.BoxPlot.XData) - min(obj.BoxPlot.XData);
+        function width = get.BoxWidth(this)
+            width = max(this.BoxPlot.XData) - min(this.BoxPlot.XData);
         end
 
-        function set.ViolinColor(obj, color)
-            obj.ViolinPlot.FaceColor = color{1};
-            obj.ScatterPlot.MarkerFaceColor = color{1};
-            obj.MeanPlot.Color = color{1};
+        function set.ViolinColor(this, color)
+            this.ViolinPlot.FaceColor = color{1};
+            this.ScatterPlot.MarkerFaceColor = color{1};
+            this.MeanPlot.Color = color{1};
 
-            if ~isempty(obj.ViolinPlot2)
-                obj.ViolinPlot2.FaceColor = color{2};
-                obj.ScatterPlot2.MarkerFaceColor = color{2};
+            if ~isempty(this.ViolinPlot2)
+                this.ViolinPlot2.FaceColor = color{2};
+                this.ScatterPlot2.MarkerFaceColor = color{2};
             end
 
-            if ~isempty(obj.ViolinPlotQ)
-                obj.ViolinPlotQ.FaceColor = color{1};
+            if ~isempty(this.ViolinPlotQ)
+                this.ViolinPlotQ.FaceColor = color{1};
             end
 
-            for idx = 1:size(obj.HistogramPlot, 1)
-                obj.HistogramPlot(idx).Color = color{1};
-            end
-
-        end
-
-        function color = get.ViolinColor(obj)
-            color{1} = obj.ViolinPlot.FaceColor;
-
-            if ~isempty(obj.ViolinPlot2)
-                color{2} = obj.ViolinPlot2.FaceColor;
+            for idx = 1:size(this.HistogramPlot, 1)
+                this.HistogramPlot(idx).Color = color{1};
             end
 
         end
 
-        function set.ViolinAlpha(obj, alpha)
-            obj.ViolinPlotQ.FaceAlpha = .65;
-            obj.ViolinPlot.FaceAlpha = alpha{1};
-            obj.ScatterPlot.MarkerFaceAlpha = 1;
+        function color = get.ViolinColor(this)
+            color{1} = this.ViolinPlot.FaceColor;
 
-            if ~isempty(obj.ViolinPlot2)
-                obj.ViolinPlot2.FaceAlpha = alpha{2};
-                obj.ScatterPlot2.MarkerFaceAlpha = 1;
+            if ~isempty(this.ViolinPlot2)
+                color{2} = this.ViolinPlot2.FaceColor;
             end
 
         end
 
-        function alpha = get.ViolinAlpha(obj)
-            alpha{1} = obj.ViolinPlot.FaceAlpha;
+        function set.ViolinAlpha(this, alpha)
+            this.ViolinPlotQ.FaceAlpha = .65;
+            this.ViolinPlot.FaceAlpha = alpha{1};
+            this.ScatterPlot.MarkerFaceAlpha = 1;
 
-            if ~isempty(obj.ViolinPlot2)
-                alpha{2} = obj.ViolinPlot2.FaceAlpha;
+            if ~isempty(this.ViolinPlot2)
+                this.ViolinPlot2.FaceAlpha = alpha{2};
+                this.ScatterPlot2.MarkerFaceAlpha = 1;
             end
 
         end
 
-        function set.ShowData(obj, yesno)
+        function alpha = get.ViolinAlpha(this)
+            alpha{1} = this.ViolinPlot.FaceAlpha;
+
+            if ~isempty(this.ViolinPlot2)
+                alpha{2} = this.ViolinPlot2.FaceAlpha;
+            end
+
+        end
+
+        function set.ShowData(this, yesno)
 
             if yesno
-                obj.ScatterPlot.Visible = 'on';
+                this.ScatterPlot.Visible = 'on';
 
-                for idx = 1:size(obj.HistogramPlot, 1)
-                    obj.HistogramPlot(idx).Visible = 'on';
+                for idx = 1:size(this.HistogramPlot, 1)
+                    this.HistogramPlot(idx).Visible = 'on';
                 end
 
             else
-                obj.ScatterPlot.Visible = 'off';
+                this.ScatterPlot.Visible = 'off';
 
-                for idx = 1:size(obj.HistogramPlot, 1)
-                    obj.HistogramPlot(idx).Visible = 'off';
+                for idx = 1:size(this.HistogramPlot, 1)
+                    this.HistogramPlot(idx).Visible = 'off';
                 end
 
             end
 
-            if ~isempty(obj.ScatterPlot2)
-                obj.ScatterPlot2.Visible = obj.ScatterPlot.Visible;
+            if ~isempty(this.ScatterPlot2)
+                this.ScatterPlot2.Visible = this.ScatterPlot.Visible;
             end
 
         end
 
-        function yesno = get.ShowData(obj)
+        function yesno = get.ShowData(this)
 
-            if ~isempty(obj.ScatterPlot)
-                yesno = strcmp(obj.ScatterPlot.Visible, 'on');
+            if ~isempty(this.ScatterPlot)
+                yesno = strcmp(this.ScatterPlot.Visible, 'on');
             end
 
         end
 
-        function set.ShowNotches(obj, yesno)
+        function set.ShowNotches(this, yesno)
 
-            if ~isempty(obj.NotchPlots)
+            if ~isempty(this.NotchPlots)
 
                 if yesno
-                    obj.NotchPlots(1).Visible = 'on';
-                    obj.NotchPlots(2).Visible = 'on';
+                    this.NotchPlots(1).Visible = 'on';
+                    this.NotchPlots(2).Visible = 'on';
                 else
-                    obj.NotchPlots(1).Visible = 'off';
-                    obj.NotchPlots(2).Visible = 'off';
+                    this.NotchPlots(1).Visible = 'off';
+                    this.NotchPlots(2).Visible = 'off';
                 end
 
             end
 
         end
 
-        function yesno = get.ShowNotches(obj)
+        function yesno = get.ShowNotches(this)
 
-            if ~isempty(obj.NotchPlots)
-                yesno = strcmp(obj.NotchPlots(1).Visible, 'on');
+            if ~isempty(this.NotchPlots)
+                yesno = strcmp(this.NotchPlots(1).Visible, 'on');
             end
 
         end
 
-        function set.ShowMean(obj, yesno)
+        function set.ShowMean(this, yesno)
 
-            if ~isempty(obj.MeanPlot)
+            if ~isempty(this.MeanPlot)
 
                 if yesno
-                    obj.MeanPlot.Visible = 'on';
+                    this.MeanPlot.Visible = 'on';
                 else
-                    obj.MeanPlot.Visible = 'off';
+                    this.MeanPlot.Visible = 'off';
                 end
 
             end
 
         end
 
-        function yesno = get.ShowMean(obj)
+        function yesno = get.ShowMean(this)
 
-            if ~isempty(obj.BoxPlot)
-                yesno = strcmp(obj.BoxPlot.Visible, 'on');
+            if ~isempty(this.BoxPlot)
+                yesno = strcmp(this.BoxPlot.Visible, 'on');
             end
 
         end
 
-        function set.ShowBox(obj, yesno)
+        function set.ShowBox(this, yesno)
 
-            if ~isempty(obj.BoxPlot)
+            if ~isempty(this.BoxPlot)
 
                 if yesno
-                    obj.BoxPlot.Visible = 'on';
+                    this.BoxPlot.Visible = 'on';
                 else
-                    obj.BoxPlot.Visible = 'off';
+                    this.BoxPlot.Visible = 'off';
                 end
 
             end
 
         end
 
-        function yesno = get.ShowBox(obj)
+        function yesno = get.ShowBox(this)
 
-            if ~isempty(obj.BoxPlot)
-                yesno = strcmp(obj.BoxPlot.Visible, 'on');
+            if ~isempty(this.BoxPlot)
+                yesno = strcmp(this.BoxPlot.Visible, 'on');
             end
 
         end
 
-        function set.ShowMedian(obj, yesno)
+        function set.ShowMedian(this, yesno)
 
-            if ~isempty(obj.MedianPlot)
+            if ~isempty(this.MedianPlot)
 
                 if yesno
-                    obj.MedianPlot.Visible = 'on';
+                    this.MedianPlot.Visible = 'on';
                 else
-                    obj.MedianPlot.Visible = 'off';
+                    this.MedianPlot.Visible = 'off';
                 end
 
             end
 
         end
 
-        function yesno = get.ShowMedian(obj)
+        function yesno = get.ShowMedian(this)
 
-            if ~isempty(obj.MedianPlot)
-                yesno = strcmp(obj.MedianPlot.Visible, 'on');
+            if ~isempty(this.MedianPlot)
+                yesno = strcmp(this.MedianPlot.Visible, 'on');
             end
 
         end
 
-        function set.ShowWhiskers(obj, yesno)
+        function set.ShowWhiskers(this, yesno)
 
-            if ~isempty(obj.WhiskerPlot)
+            if ~isempty(this.WhiskerPlot)
 
                 if yesno
-                    obj.WhiskerPlot.Visible = 'on';
+                    this.WhiskerPlot.Visible = 'on';
                 else
-                    obj.WhiskerPlot.Visible = 'off';
+                    this.WhiskerPlot.Visible = 'off';
                 end
 
             end
 
         end
 
-        function yesno = get.ShowWhiskers(obj)
+        function yesno = get.ShowWhiskers(this)
 
-            if ~isempty(obj.WhiskerPlot)
-                yesno = strcmp(obj.WhiskerPlot.Visible, 'on');
+            if ~isempty(this.WhiskerPlot)
+                yesno = strcmp(this.WhiskerPlot.Visible, 'on');
             end
 
         end
@@ -797,11 +797,11 @@ classdef Violin < handle
             results = p.Results;
         end
 
-        function [x, y] = swapOrientationMaybe(obj, x, y)
+        function [x, y] = swapOrientationMaybe(this, x, y)
             %swapOrientationMaybe swaps the two variables x and y
             % if Violin.Orientation property set to horizontal.
             % If orientation is vertical, it returns x and y as is.
-            if strcmp(obj.Orientation, 'horizontal')
+            if strcmp(this.Orientation, 'horizontal')
                 tmp = x;
                 x = y;
                 y = tmp;
