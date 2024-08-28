@@ -70,10 +70,17 @@ classdef Violin < handle
     %    NotchPlots     - <a href="matlab:help('scatter')">scatter</a> plots for the notch indicators
     %    MeanPlot       - line <a href="matlab:help('plot')">plot</a> at mean value
     
-    
     % Copyright (c) 2016, Bastian Bechtold
     % This code is released under the terms of the BSD 3-clause license
     
+    % Modified by Richard J. Cui. Started: Wed 08/28/2024 08:39:40.643 AM
+    % $Revision: 0.1 $  $Date: Wed 08/28/2024 08:39:40.643 AM $
+    %
+    % Mayo Clinic Foundation
+    % Rochester, MN 55901, USA
+    %
+    % Email: Cui.Jie@mayo.edu
+
     properties (Access=public)
         ScatterPlot     % scatter plot of the data points
         ScatterPlot2    % comparison scatter plot of the data points
