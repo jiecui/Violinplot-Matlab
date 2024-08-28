@@ -191,7 +191,7 @@ classdef Violin < handle
             
             if isempty(args.ViolinColor)
                 Release= strsplit(version('-release'), {'a','b'}); %Check release
-                if str2num(Release{1})> 2019 || strcmp(version('-release'), '2019b')  
+                if str2double(Release{1})> 2019 || strcmp(version('-release'), '2019b')  
                      C = colororder;
                 else
                      C = lines;
@@ -315,7 +315,7 @@ classdef Violin < handle
                 
             %% Plot the quartiles within the violin
             quartiles = quantile(data, [0.25, 0.5, 0.75]);
-            flat= [halfViol*pos halfViol*pos];
+            % flat= [halfViol*pos halfViol*pos];
             switch args.QuartileStyle
                 case 'shadow'
                     switch args.HalfViolin
