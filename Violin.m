@@ -74,7 +74,7 @@ classdef Violin < handle
     % This code is released under the terms of the BSD 3-clause license
 
     % Modified by Richard J. Cui. Started: Wed 08/28/2024 08:39:40.643 AM
-    % $Revision: 0.1 $  $Date: Wed 08/28/2024 08:39:40.643 AM $
+    % $Revision: 0.2 $  $Date: Mon 04/28/2025 10:35:13.444 AM$
     %
     % Mayo Clinic Foundation
     % Rochester, MN 55901, USA
@@ -90,6 +90,7 @@ classdef Violin < handle
         WhiskerPlot % line plot between the whisker ends
         MedianPlot % scatter plot of the median (one point)
         NotchPlots % scatter plots for the notch indicators
+        NumPoints % number of eqully spaced points for the kernel density estimate
         MeanPlot % line plot of the mean (horizontal line)
         HistogramPlot % histogram of the data
         ViolinPlotQ % fill plot of the Quartiles as shadow
@@ -145,6 +146,8 @@ classdef Violin < handle
             %                    Defaults to 24
             % 'MedianMarkerSize' Size of the median indicator, if shown.
             %                    Defaults to 36
+            %     'NumPoints'    Number of equally spaced points for the
+            %                    kernel density estimate. Defaults to 100
             %     'EdgeColor'    Color of the violin area outline.
             %                    Defaults to [0.5 0.5 0.5]
             %     'BoxColor'     Color of the box, whiskers, and the
@@ -190,6 +193,9 @@ classdef Violin < handle
                 data = data{1};
             end
 
+            % get number of points for the kernel density estimate
+            n_points = args.NumPoints;
+            this.NumPoints = n_points;
             if isempty(args.ViolinColor)
                 Release = strsplit(version('-release'), {'a', 'b'}); %Check release
 
@@ -220,12 +226,14 @@ classdef Violin < handle
             hold(this.Parent, 'on');
 
             %% Calculate kernel density estimation for the violin
-            [density, value, width] = this.calcKernelDensity(data, args.Bandwidth, args.Width);
+            [density, value, width] = this.calcKernelDensity(data, args.Bandwidth, ...
+                args.Width, n_points);
 
             % also calculate the kernel density of the comparison data if
             % provided
             if ~isempty(data2)
-                [densityC, valueC, widthC] = this.calcKernelDensity(data2, args.Bandwidth, args.Width);
+                [densityC, valueC, widthC] = this.calcKernelDensity(data2, ...
+                    args.Bandwidth, args.Width, n_points);
             end
 
             %% Plot the data points within the violin area
@@ -769,6 +777,7 @@ classdef Violin < handle
             p.addParameter('MarkerSize', 24, @isnumeric);
             p.addParameter('MedianMarkerSize', 36, @isnumeric);
             p.addParameter('LineWidth', 0.75, @isnumeric);
+            p.addParameter('NumPoints', 100, isscalarnumber);
             p.addParameter('BoxColor', [0.5 0.5 0.5], iscolor);
             p.addParameter('BoxWidth', 0.01, isscalarnumber);
             p.addParameter('EdgeColor', [0.5 0.5 0.5], iscolor);
@@ -813,13 +822,23 @@ classdef Violin < handle
 
     methods (Static)
 
-        function [density, value, width] = calcKernelDensity(data, bandwidth, width)
+        function [density, value, width] = calcKernelDensity(data, bandwidth, ...
+                width, n_points)
+            % calcKernelDensity calculates the kernel density estimation
+
+            arguments
+                data (1, :) double
+                bandwidth double {mustBeNonnegative}
+                width double {mustBeNonnegative}
+                n_points (1, 1) double {mustBeInteger, mustBePositive} = 100
+            end
 
             if isempty(data)
                 error('Empty input data');
             end
 
-            [density, value] = ksdensity(data, 'bandwidth', bandwidth);
+            [density, value] = ksdensity(data, 'bandwidth', bandwidth, ...
+                'NumPoints', n_points);
             density = density(value >= min(data) & value <= max(data));
             value = value(value >= min(data) & value <= max(data));
             value(1) = min(data);
@@ -839,3 +858,5 @@ classdef Violin < handle
     end
 
 end
+
+% [EOF]
