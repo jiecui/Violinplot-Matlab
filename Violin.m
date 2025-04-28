@@ -181,7 +181,7 @@ classdef Violin < handle
             this.Orientation = args.Orientation;
             this.Parent = args.Parent;
 
-            if length(data) == 1
+            if isscalar(data)
                 data2 = [];
                 data = data{1};
 
@@ -209,7 +209,7 @@ classdef Violin < handle
             data = data(not(isnan(data)));
             data2 = data2(not(isnan(data2)));
 
-            if numel(data) == 1
+            if isscalar(data)
                 [x, y] = this.swapOrientationMaybe(pos, data);
                 this.MedianPlot = scatter(x, y, 'filled', 'Parent', this.Parent);
                 this.MedianColor = args.MedianColor;
@@ -824,7 +824,7 @@ classdef Violin < handle
             value = value(value >= min(data) & value <= max(data));
             value(1) = min(data);
             value(end) = max(data);
-            value = [value(1) * (1 - 1E-5), value, value(end) * (1 + 1E-5)];
+            value = [value(1) * (1 -1E-5), value, value(end) * (1 +1E-5)];
             density = [0, density, 0];
 
             % all data is identical
